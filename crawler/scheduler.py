@@ -55,7 +55,7 @@ class Scheduler:
         """
         if depth > self.depth_limit:
             return False
-        if obj_url.geturl() in self.set_discovered_urls:
+        if self.set_discovered_urls.__contains__(obj_url.geturl()):
             return False
         return True
 
@@ -67,12 +67,15 @@ class Scheduler:
         :param depth: Profundidade na qual foi coletada essa URL
         :return: True caso a página foi adicionada. False caso contrário
         """
+
         if (not self.can_add_page(obj_url, depth)):
             return False
 
         domain = Domain(obj_url.hostname, Scheduler.TIME_LIMIT_BETWEEN_REQUESTS)
-        if not domain in self.dic_url_per_domain:
-            self.dic_url_per_domain[domain] = [(obj_url, depth)]
+
+        if not (domain in self.dic_url_per_domain):
+            self.dic_url_per_domain[domain] = []
+            self.dic_url_per_domain[domain].append((obj_url, depth))
         else:
             self.dic_url_per_domain[domain].append((obj_url, depth))
 
@@ -86,12 +89,9 @@ class Scheduler:
         Logo após, caso o servidor não tenha mais URLs, o mesmo também é removido.
         """
         for domain in self.dic_url_per_domain.keys():
-            if len(self.dic_url_per_domain[domain]) > 0:
-                if domain.is_accessible():
+            if domain.is_accessible():
+                if len(self.dic_url_per_domain[domain]) > 0:
                     return self.dic_url_per_domain[domain].pop(0)
-            else:
-                self.dic_url_per_domain.pop(domain)
-
 
     def can_fetch_page(self, obj_url: ParseResult) -> bool:
         """
