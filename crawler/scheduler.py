@@ -53,7 +53,14 @@ class Scheduler:
         """
         :return: True caso a profundidade for menor que a maxima e a url não foi descoberta ainda. False caso contrário.
         """
-        return False
+        urls = []
+        for url in self.set_discovered_urls:
+            urls.append(url.netloc)
+        if depth > self.depth_limit:
+            return False
+        if obj_url.netloc in urls:
+            return False
+        return True
 
     @synchronized
     def add_new_page(self, obj_url: ParseResult, depth: int) -> bool:
@@ -63,9 +70,11 @@ class Scheduler:
         :param depth: Profundidade na qual foi coletada essa URL
         :return: True caso a página foi adicionada. False caso contrário
         """
-        # https://docs.python.org/3/library/urllib.parse.html
-
-        return False
+        if (not self.can_add_page(obj_url, depth)):
+            return False
+        self.dic_url_per_domain[obj_url.netloc] = obj_url
+        self.set_discovered_urls.add(obj_url)
+        return True
 
     @synchronized
     def get_next_url(self) -> tuple:
@@ -73,7 +82,11 @@ class Scheduler:
         Obtém uma nova URL por meio da fila. Essa URL é removida da fila.
         Logo após, caso o servidor não tenha mais URLs, o mesmo também é removido.
         """
-        return None, None
+        url = self.dic_url_per_domain[0].popitem()
+        if(self.dic_url_per_domain[0].__len__ == 0):
+            self.dic_url_per_domain.popitem()
+
+        return url[0], url[1]
 
     def can_fetch_page(self, obj_url: ParseResult) -> bool:
         """

@@ -46,12 +46,12 @@ class SchedulerTest(unittest.TestCase):
         arr_str_urls_seeds = ["cnn.com",
                               "www.gq.com.au/", "www.huffingtonpost.com/"]
         arr_urls_seeds = [urlparse(str_url) for str_url in arr_str_urls_seeds]
-        
+
         self.scheduler = Scheduler(usr_agent="xxbot",
                                    page_limit=self.TIME_LIMIT,
                                    depth_limit=self.DEPTH_LIMIT,
                                    arr_urls_seeds=arr_urls_seeds)
-        
+
         self.assertEqual(len(arr_str_urls_seeds), self.scheduler.page_count, "Nao foi adicionado as sementes solicitadas")
 
     def test_can_add_page(self):
@@ -87,6 +87,8 @@ class SchedulerTest(unittest.TestCase):
         # tuplas url,profundidade a serem testadas
 
         arr_urls = [self.urlXpto, self.urlTerra, self.urlTerraRep, self.urlUOL1, self.urlUOL2, self.urlGlobo]
+        for i in arr_urls:
+            print(i)
 
         # adiciona todas as paginas em ordem
         # "**" faz passar a url e a profundidade
@@ -96,6 +98,7 @@ class SchedulerTest(unittest.TestCase):
         urls = set()
         for key, arr in self.scheduler.dic_url_per_domain.items():
             set_urls = set(arr)
+            print(set_urls)
             self.assertTrue(len(set_urls) == len(
                 arr), "Existem URLs repetidas na fila!")
 
