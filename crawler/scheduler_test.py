@@ -87,8 +87,6 @@ class SchedulerTest(unittest.TestCase):
         # tuplas url,profundidade a serem testadas
 
         arr_urls = [self.urlXpto, self.urlTerra, self.urlTerraRep, self.urlUOL1, self.urlUOL2, self.urlGlobo]
-        for i in arr_urls:
-            print(i)
 
         # adiciona todas as paginas em ordem
         # "**" faz passar a url e a profundidade
@@ -98,7 +96,6 @@ class SchedulerTest(unittest.TestCase):
         urls = set()
         for key, arr in self.scheduler.dic_url_per_domain.items():
             set_urls = set(arr)
-            print(set_urls)
             self.assertTrue(len(set_urls) == len(
                 arr), "Existem URLs repetidas na fila!")
 

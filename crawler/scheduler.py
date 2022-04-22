@@ -53,12 +53,9 @@ class Scheduler:
         """
         :return: True caso a profundidade for menor que a maxima e a url não foi descoberta ainda. False caso contrário.
         """
-        urls = []
-        for url in self.set_discovered_urls:
-            urls.append(url.netloc)
         if depth > self.depth_limit:
             return False
-        if obj_url.netloc in urls:
+        if obj_url.geturl() in self.set_discovered_urls:
             return False
         return True
 
@@ -72,8 +69,14 @@ class Scheduler:
         """
         if (not self.can_add_page(obj_url, depth)):
             return False
-        self.dic_url_per_domain[obj_url.netloc] = obj_url
-        self.set_discovered_urls.add(obj_url)
+
+        domain = Domain(obj_url.hostname, Scheduler.TIME_LIMIT_BETWEEN_REQUESTS)
+        if not domain in self.dic_url_per_domain:
+            self.dic_url_per_domain[domain] = [(obj_url, depth)]
+        else:
+            self.dic_url_per_domain[domain].append((obj_url, depth))
+
+        self.set_discovered_urls.add(obj_url.geturl())
         return True
 
     @synchronized
@@ -82,11 +85,13 @@ class Scheduler:
         Obtém uma nova URL por meio da fila. Essa URL é removida da fila.
         Logo após, caso o servidor não tenha mais URLs, o mesmo também é removido.
         """
-        url = self.dic_url_per_domain[0].popitem()
-        if(self.dic_url_per_domain[0].__len__ == 0):
-            self.dic_url_per_domain.popitem()
+        for domain in self.dic_url_per_domain.keys():
+            if len(self.dic_url_per_domain[domain]) > 0:
+                if domain.is_accessible():
+                    return self.dic_url_per_domain[domain].pop(0)
+            else:
+                self.dic_url_per_domain.pop(domain)
 
-        return url[0], url[1]
 
     def can_fetch_page(self, obj_url: ParseResult) -> bool:
         """
