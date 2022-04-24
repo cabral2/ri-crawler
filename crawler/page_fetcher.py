@@ -16,9 +16,12 @@ class PageFetcher(Thread):
         :param obj_url: Instância da classe ParseResult com a URL a ser requisitada.
         :return: Conteúdo em binário da URL passada como parâmetro, ou None se o conteúdo não for HTML
         """
-
+        user_agent = 'Savinho/0.1'
         response = None
+        response = requests.get(obj_url.geturl(), headers={ 'User-Agent':  user_agent })
 
+        if not response.headers['Content-type'].__contains__('text/html'):
+            return None
         return response.content
 
     def discover_links(self, obj_url: ParseResult, depth: int, bin_str_content: bytes):
