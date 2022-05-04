@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from threading import Thread
 import requests
 from urllib.parse import urlparse, urljoin, ParseResult
+import re
 
 
 class PageFetcher(Thread):
@@ -29,9 +30,20 @@ class PageFetcher(Thread):
         Retorna os links do conteúdo bin_str_content da página já requisitada obj_url
         """
         soup = BeautifulSoup(bin_str_content, features="lxml")
-        for link in soup.select(None):
-            obj_new_url = None
-            new_depth = None
+
+        for link in soup.select('body a'):
+            url = link.attrs['href']
+            regex = "^(http(s)?:\/\/)|^(www.)"
+            
+            if re.search(regex, url):
+                obj_new_url = urlparse(url)
+            else:
+                obj_new_url = urlparse(f"{obj_url.geturl()}/{url}")
+
+            if obj_url.netloc == obj_new_url.netloc:
+                new_depth = depth + 1
+            else:
+                new_depth = 0
 
             yield obj_new_url, new_depth
 
