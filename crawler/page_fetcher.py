@@ -6,9 +6,11 @@ import requests
 from urllib.parse import urlparse, urljoin, ParseResult
 import re
 
+from crawler.scheduler import Scheduler
+
 
 class PageFetcher(Thread):
-    def __init__(self, obj_scheduler):
+    def __init__(self, obj_scheduler: Scheduler):
         super().__init__()
         self.obj_scheduler = obj_scheduler
 
@@ -29,16 +31,20 @@ class PageFetcher(Thread):
         """
         Retorna os links do conteúdo bin_str_content da página já requisitada obj_url
         """
-        soup = BeautifulSoup(bin_str_content, features="lxml")
+        soup = BeautifulSoup(bin_str_content, features='lxml')
 
-        for link in soup.select('body a'):
+        for link in soup.select('a'):
+            if link.get('href') is None:
+                return None
+
             url = link.attrs['href']
-            regex = "^(http(s)?:\/\/)|^(www.)"
-            
+            regex = '^(http(s)?:\/\/)|^(www.)'
+
             if re.search(regex, url):
                 obj_new_url = urlparse(url)
             else:
-                obj_new_url = urlparse(f"{obj_url.geturl()}/{url}")
+                parsed_url = url.replace('/', '')
+                obj_new_url = urlparse(f'{obj_url.geturl()}{parsed_url}')
 
             if obj_url.netloc == obj_new_url.netloc:
                 new_depth = depth + 1
@@ -51,10 +57,29 @@ class PageFetcher(Thread):
         """
         Coleta uma nova URL, obtendo-a do escalonador
         """
-        pass
+        url, depth = self.obj_scheduler.get_next_url()
+
+        if url is None:
+            return
+
+        content = None
+        try:
+            content = self.request_url(url)
+        except:
+            print('Erro ao requisitar URL')
+
+        if content is not None:
+            for current_url, current_depth in self.discover_links(url, depth, content):
+                if current_url is not None:
+
+                    self.obj_scheduler.count_fetched_page()
+                    print('url: ', current_url.geturl())
+
+        # - Caso a URL seja um HTML válido, imprima esta URL e extraia os seus links
 
     def run(self):
         """
         Executa coleta enquanto houver páginas a serem coletadas
         """
-        pass
+        while not self.obj_scheduler.has_finished_crawl():
+            self.crawl_new_url()

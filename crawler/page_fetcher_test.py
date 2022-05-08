@@ -27,7 +27,7 @@ class PageFetcherTest(unittest.TestCase):
         obj_url = urlparse("https://www.pudim.com.br")
         bin_str_content = b"oi<a href='https://www.pudim.com.br/lala.html'></a>\
                               <a href='xxi/lala.html'></a>\
-                             <a href='http://www.terra.com.br/oi/lala.html'></a>"
+                             <a href='https://www.terra.com.br/oi/lala.html'></a>"
 
         arr_expected_links = [(urlparse('https://www.pudim.com.br/lala.html'), 3),
                               (urlparse('https://www.pudim.com.br/xxi/lala.html'), 3),
