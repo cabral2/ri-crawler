@@ -33,18 +33,19 @@ class PageFetcher(Thread):
         """
         soup = BeautifulSoup(bin_str_content, features='lxml')
 
-        for link in soup.select('a'):
-            if link.get('href') is None:
-                return None
+        for link in soup.select('body a'):
+            url = ''
+            try:
+                url = link.attrs['href']
+            except:
+                continue
 
-            url = link.attrs['href']
             regex = '^(http(s)?:\/\/)|^(www.)'
 
             if re.search(regex, url):
                 obj_new_url = urlparse(url)
             else:
-                parsed_url = url.replace('/', '')
-                obj_new_url = urlparse(f'{obj_url.geturl()}{parsed_url}')
+                obj_new_url = urlparse(f'{obj_url.geturl()}{"" if url.startswith("/") else "/"}{url}')
 
             if obj_url.netloc == obj_new_url.netloc:
                 new_depth = depth + 1
@@ -71,8 +72,8 @@ class PageFetcher(Thread):
         if content is not None:
             for current_url, current_depth in self.discover_links(url, depth, content):
                 if current_url is not None:
-
                     self.obj_scheduler.count_fetched_page()
+                    self.obj_scheduler.add_new_page(current_url, current_depth)
                     print('url: ', current_url.geturl())
 
         # - Caso a URL seja um HTML válido, imprima esta URL e extraia os seus links

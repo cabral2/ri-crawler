@@ -55,6 +55,7 @@ class Scheduler:
         """
         :return: True caso a profundidade for menor que a maxima e a url não foi descoberta ainda. False caso contrário.
         """
+
         if depth > self.depth_limit:
             return False
         if self.set_discovered_urls.__contains__(obj_url.geturl()):
@@ -69,7 +70,6 @@ class Scheduler:
         :param depth: Profundidade na qual foi coletada essa URL
         :return: True caso a página foi adicionada. False caso contrário
         """
-
         if (not self.can_add_page(obj_url, depth)):
             return False
 
