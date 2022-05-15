@@ -73,6 +73,7 @@ class Scheduler:
         if (not self.can_add_page(obj_url, depth)):
             return False
 
+        print('url: ', obj_url.geturl())
         domain = Domain(obj_url.netloc, self.TIME_LIMIT_BETWEEN_REQUESTS)
 
         if not (domain in self.dic_url_per_domain):

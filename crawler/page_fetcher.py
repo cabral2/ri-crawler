@@ -40,13 +40,11 @@ class PageFetcher(Thread):
             except:
                 continue
 
-            regex = '^(http(s)?:\/\/)|^(www.)'
+            obj_new_url = urlparse(url)
 
-            if re.search(regex, url):
-                obj_new_url = urlparse(url)
-            else:
-                obj_new_url = urlparse(f'{obj_url.geturl()}{"" if url.startswith("/") else "/"}{url}')
-
+            if obj_new_url.hostname is None:
+                obj_new_url = urlparse(f'{obj_url.scheme}://{obj_url.hostname}{"" if obj_new_url.path.startswith("/") else "/"}{obj_new_url.path}')
+        
             if obj_url.netloc == obj_new_url.netloc:
                 new_depth = depth + 1
             else:
@@ -74,7 +72,8 @@ class PageFetcher(Thread):
                 if current_url is not None:
                     self.obj_scheduler.count_fetched_page()
                     self.obj_scheduler.add_new_page(current_url, current_depth)
-                    print('url: ', current_url.geturl())
+                    
+
 
         # - Caso a URL seja um HTML válido, imprima esta URL e extraia os seus links
 
