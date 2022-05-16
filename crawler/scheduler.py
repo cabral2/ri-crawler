@@ -76,7 +76,7 @@ class Scheduler:
         print('url: ', obj_url.geturl())
         domain = Domain(obj_url.netloc, self.TIME_LIMIT_BETWEEN_REQUESTS)
 
-        if not (domain in self.dic_url_per_domain):
+        if domain not in self.dic_url_per_domain:
             self.dic_url_per_domain[domain] = []
             self.dic_url_per_domain[domain].append((obj_url, depth))
         else:
@@ -109,8 +109,8 @@ class Scheduler:
         """
         domain = Domain(obj_url.netloc, self.TIME_LIMIT_BETWEEN_REQUESTS)
 
-        if not (domain in self.dic_robots_per_domain):
-            robots_url = url=f'https://{obj_url.netloc}/robots.txt'
+        if domain not in self.dic_robots_per_domain:
+            robots_url = f'https://{obj_url.netloc}/robots.txt'
             url = obj_url.geturl()
             robots_parser = robotparser.RobotFileParser()
             robots_parser.set_url(robots_url)
